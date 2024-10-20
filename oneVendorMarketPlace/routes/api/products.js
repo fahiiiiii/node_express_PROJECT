@@ -103,6 +103,10 @@ router.get("/", authenticateToken, async (req, res) => {
 //!api for getting all products of the marketPlace
 router.get("/allProducts", async (req, res) => {
   try {
+    let current = req?.query?.current ?? "1";
+    current = parseInt(current);
+    let pageSize = req?.query?.pageSize ?? "10";
+    pageSize = parseInt(pageSize);
     const aggregate = [];
     aggregate.push({
       $sort: {
@@ -125,23 +129,37 @@ router.get("/allProducts", async (req, res) => {
         as: "productOwner",
       },
     });
-    aggregate.push({
-      $match:{
-        // price:10
-        _id: new mongoose.Types.objectId("67010cc60ebc49585ede9c6b")
-      }
-    })
+    // aggregate.push({
+    //   $match:{
+    //     // price:10
+    //     _id: new mongoose.Types.ObjectId("670112112c3d1066164ba84e")
+    //   }
+    // })
 
     // aggregate.push({
-    //   $match:{
-    //     price:10
+    //   $group:{
+    //     _id:"$name",
+    //     cumalitivePrice:{$sum:'$price'}
     //   }
     // })
     // aggregate.push({
-    //   $match:{
-    //     price:10
+    //   $group:{
+    //     _id:"$name",
+    //     averagePrice:{$avg:'$price'}
     //   }
     // })
+    // aggregate.push({
+    //   $sort: {
+    //     createdAt: -1,
+    //   },
+    // });
+    aggregate.push({
+      $skip: 2,
+      
+    });
+    aggregate.push({
+      $limit: pageSize,
+    });
     const products = await Product.aggregate(aggregate);
     if (!products) {
       errorMessageFor404(res);
