@@ -113,22 +113,7 @@ router.get("/allProducts", async (req, res) => {
         createdAt: -1,
       },
     });
-    aggregate.push({
-      $lookup: {
-        from: "files",
-        localField: "fileId",
-        foreignField: "_id",
-        as: "File",
-      },
-    });
-    aggregate.push({
-      $lookup: {
-        from: "users",
-        localField: "userId",
-        foreignField: "_id",
-        as: "productOwner",
-      },
-    });
+    
     // aggregate.push({
     //   $match:{
     //     // price:10
@@ -154,12 +139,30 @@ router.get("/allProducts", async (req, res) => {
     //   },
     // });
     aggregate.push({
-      $skip: 2,
+      $skip: ((current-1) * pageSize),
       
     });
     aggregate.push({
-      $limit: pageSize,
+      $limit: (pageSize * 1),
     });
+
+    aggregate.push({
+      $lookup: {
+        from: "files",
+        localField: "fileId",
+        foreignField: "_id",
+        as: "File",
+      },
+    });
+    aggregate.push({
+      $lookup: {
+        from: "users",
+        localField: "userId",
+        foreignField: "_id",
+        as: "productOwner",
+      },
+    });
+
     const products = await Product.aggregate(aggregate);
     if (!products) {
       errorMessageFor404(res);
